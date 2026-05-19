@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Kisi Difraksi (PhET Advanced)</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --panel-color: #2d2d2d;
+            --text-color: #ffffff;
+            --accent-color: #9b5de5;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+            font-size: 24px;
+            color: var(--accent-color);
+        }
+
+        p.subtitle {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            background: var(--panel-color);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .canvas-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            background: #222;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .btn {
+            background: #444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #555;
+        }
+
+        .btn.active {
+            background: var(--accent-color);
+            color: #000;
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        canvas {
+            background: #000;
+            border-radius: 8px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            width: 100%;
+            height: auto;
+        }
+
+        .control-panel {
+            flex: 1;
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 280px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        label span {
+            color: var(--accent-color);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #444;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .data-display {
+            background: #111;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--accent-color);
+            font-family: monospace;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .legend {
+            font-size: 12px;
+            color: #aaa;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Simulasi Laboratorium Kisi Difraksi</h1>
+    <p class="subtitle">Eksperimen Optik Fisis - Interferensi Banyak Celah (PhET Style)</p>
+
+    <div class="main-container">
+        <div class="canvas-container">
+            <div class="playback-controls">
+                <button id="btnPausePlay" class="btn active">⏸ Pause</button>
+                <div style="border-left: 1px solid #444; margin: 0 5px;"></div>
+                <button id="btnNormal" class="btn active">Normal Speed</button>
+                <button id="btnSlow" class="btn">Slow Motion</button>
+            </div>
+            
+            <canvas id="simCanvas" width="700" height="450"></canvas>
+        </div>
+
+        <div class="control-panel">
+            <h3>Kontrol Eksperimen</h3>
+            <hr style="border: 0; border-top: 1px solid #444; margin-top: -10px;">
+
+            <div class="control-group">
+                <label>Panjang Gelombang, λ: <span id="lambda-val">550</span> nm</label>
+                <input type="range" id="wavelength" min="400" max="700" value="550">
+            </div>
+
+            <div class="control-group">
+                <label>Kerapatan Kisi, N :<span id="N-val">300</span> garis/mm</label>
+                <input type="range" id="gratingDensity" min="100" max="600" step="50" value="300">
+            </div>
+
+            <div class="control-group">
+                <label>Jarak Layar, L :<span id="L-val">2.0</span> m</label>
+                <input type="range" id="screenDistance" min="1.0" max="3.0" step="0.1" value="2.0">
+            </div>
+
+            <div class="data-display">
+                <div>Jarak Antar Garis Terang: <span id="dy-val">0.00</span> mm</div>
+                <div>Konstanta Kisi (d = 1/N): <span id="d-val">0.00</span> &mu;m</div>
+            </div>
+
+            <div class="legend">
+                <strong>Karakteristik Efek Banyak Celah (Kisi):</strong><br>
+                • <b>Garis Terang Sangat Tajam:</b> Berbeda dari celah tunggal/ganda, kisi menghasilkan garis pita yang sangat tipis dan terpisah tegas.<br>
+                • <b>Makin Rapat Kisi (N membesar):</b> Jarak antar garis terang (d.sin θ = m.λ) akan "semakin renggang" secara signifikan di layar.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Elemen UI
+        const wlInput = document.getElementById('wavelength');
+        const NInput = document.getElementById('gratingDensity');
+        const LInput = document.getElementById('screenDistance');
+        const lambdaVal = document.getElementById('lambda-val');
+        const NVal = document.getElementById('N-val');
+        const LVal = document.getElementById('L-val');
+        const dyVal = document.getElementById('dy-val');
+        const dVal = document.getElementById('d-val');
+
+        const btnPausePlay = document.getElementById('btnPausePlay');
+        const btnNormal = document.getElementById('btnNormal');
+        const btnSlow = document.getElementById('btnSlow');
+
+        // State Animasi
+        let time = 0;
+        let isPaused = false;
+        let speedMultiplier = 0.2; 
+
+        // Listener Kontrol Animasi
+        btnPausePlay.addEventListener('click', () => {
+            isPaused = !isPaused;
+            btnPausePlay.innerText = isPaused ? "▶ Play" : "⏸ Pause";
+            if (isPaused) btnPausePlay.classList.remove('active');
+            else btnPausePlay.classList.add('active');
+        });
+
+        btnNormal.addEventListener('click', () => {
+            speedMultiplier = 0.2;
+            btnNormal.classList.add('active');
+            btnSlow.classList.remove('active');
+        });
+
+        btnSlow.addEventListener('click', () => {
+            speedMultiplier = 0.04;
+            btnSlow.classList.add('active');
+            btnNormal.classList.remove('active');
+        });
+
+        // Konversi Spektrum Warna Optik (nm ke RGB)
+        function wavelengthToRGB(wavelength) {
+            let r, g, b, alpha;
+            if (wavelength >= 380 && wavelength < 440) {
+                r = -((wavelength - 440) / (440 - 380)); g = 0.0; b = 1.0;
+            } else if (wavelength >= 440 && wavelength < 490) {
+                r = 0.0; g = (wavelength - 440) / (490 - 440); b = 1.0;
+            } else if (wavelength >= 490 && wavelength < 510) {
+                r = 0.0; g = 1.0; b = -((wavelength - 510) / (510 - 490));
+            } else if (wavelength >= 510 && wavelength < 580) {
+                r = (wavelength - 510) / (580 - 510); g = 1.0; b = 0.0;
+            } else if (wavelength >= 580 && wavelength < 645) {
+                r = 1.0; g = -((wavelength - 645) / (645 - 580)); b = 0.0;
+            } else if (wavelength >= 645 && wavelength <= 780) {
+                r = 1.0; g = 0.0; b = 0.0;
+            } else {
+                r = 0.0; g = 0.0; b = 0.0;
+            }
+
+            if (wavelength >= 380 && wavelength < 420) alpha = 0.3 + 0.7 * (wavelength - 380) / (420 - 380);
+            else if (wavelength >= 420 && wavelength <= 700) alpha = 1.0;
+            else if (wavelength >= 700 && wavelength <= 780) alpha = 0.3 + 0.7 * (780 - wavelength) / (780 - 700);
+            else alpha = 0;
+
+            return {
+                r: Math.round(r * 255),
+                g: Math.round(g * 255),
+                b: Math.round(b * 255),
+                rgbaStr: `rgba(${Math.round(r*255)}, ${Math.round(g*255)}, ${Math.round(b*255)}, ${alpha})`
+            };
+        }
+
+        function drawSimulation() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const lambda = parseFloat(wlInput.value); // nm
+            const N = parseFloat(NInput.value); // garis per mm
+            const L = parseFloat(LInput.value); // m
+
+            NVal.innerText = N;
+            lambdaVal.innerText = lambda;
+            LVal.innerText = L.toFixed(1);
+
+            // Hitung konstanta kisi d = 1 / N (mm) -> ubah ke micrometer
+            const dMicrometer = (1 / N) * 1000; 
+            dVal.innerText = dMicrometer.toFixed(2);
+
+            // Rumus Kisi Difraksi Orde-1: dy = (lambda * L) / d
+            const dyReal = (lambda * 1e-9 * L) / (dMicrometer * 1e-6);
+            dyVal.innerText = (dyReal * 1000).toFixed(3); // mm
+
+            const colorObj = wavelengthToRGB(lambda);
+
+            const slitX = 140;
+            const screenX = 460;
+            const centerY = canvas.height / 2;
+
+            // 1. Gambar Komponen Fisik (Laser Sumber)
+            ctx.fillStyle = colorObj.rgbaStr;
+            ctx.fillRect(0, centerY - 20, slitX, 40);
+            ctx.fillStyle = "#fff";
+            ctx.font = "11px sans-serif";
+            ctx.fillText("SUMBER LASER", 20, centerY + 4);
+
+            // Kisi Difraksi (Banyak celah kecil digambar berlapis secara visual)
+            ctx.fillStyle = "#444";
+            ctx.fillRect(slitX, 0, 12, canvas.height);
+            
+            // Menggambar garis-garis kisi halus secara visual di alat penghalang
+            ctx.strokeStyle = "#111";
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.height; i += 6) {
+                ctx.beginPath();
+                ctx.moveTo(slitX, i);
+                ctx.lineTo(slitX + 12, i);
+                ctx.stroke();
+            }
+            ctx.fillStyle = "#9b5de5";
+            ctx.fillText("Kisi (N)", slitX - 40, 25);
+
+            if (!isPaused) {
+                time += speedMultiplier;
+            }
+
+            // 2. Render Animasi Gelombang Kisi (Banyak berkas cahaya lurus tajam)
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(slitX + 12, 0, screenX - slitX - 12, canvas.height);
+            ctx.clip();
+
+            // Faktor skala visualisasi berkas garis interferensi konstruktif
+            const visualScaleFactor = (N / lambda) * 160; 
+
+            for (let r = 5; r < 340; r += 16) {
+                let waveIntensity = (1 + Math.sin(r * 0.15 - time)) * 0.3;
+                ctx.strokeStyle = `rgba(${colorObj.r}, ${colorObj.g}, ${colorObj.b}, ${waveIntensity})`;
+                ctx.lineWidth = 1.5;
+                
+                // Pada kisi, muka gelombang yang dominan terlihat menjalar adalah pada sudut-sudut orde terang spesifik saja
+                ctx.beginPath();
+                ctx.arc(slitX + 12, centerY, r, -Math.PI/2.3, Math.PI/2.3);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // 3. Render Grafik Intensitas Kisi & Pola Garis Spektrum Layar
+            ctx.fillStyle = "#050505";
+            ctx.fillRect(screenX, 0, canvas.width - screenX, canvas.height);
+
+            for (let y = 0; y < canvas.height; y++) {
+                const yOffset = y - centerY;
+                
+                // Pemodelan fisis intensitas interferensi banyak celah (N-slit)
+                // Menggunakan fungsi tajam berpuncak tinggi (pendekatan dirac-delta / fungsi interferensi kisi murni)
+                const phase = yOffset * visualScaleFactor * 0.0003;
+                
+                // Rumus matematika untuk ketajaman puncak interferensi kisi
+                // Semakin besar N, pangkat pengali mempertajam kurva agar tidak melebar seperti celah ganda
+                const interference = Math.pow(Math.abs(Math.sin(10 * phase) / (10 * Math.sin(phase) || 1)), 2);
+                const decayFactor = Math.exp(-Math.pow(yOffset / 220, 2)); // Sedikit redaman alami lensa/layar
+                const intensity = interference * decayFactor;
+
+                // A. Grafik Intensitas Kisi yang Sangat Lancip/Tajam
+                const graphWidth = intensity * 120;
+                ctx.fillStyle = `rgba(${colorObj.r}, ${colorObj.g}, ${colorObj.b}, 0.5)`;
+                ctx.fillRect(screenX + 10, y, graphWidth, 1);
+
+                if (y > 0 && intensity > 0.02) {
+                    ctx.fillStyle = `rgba(255, 255, 255, 0.4)`;
+                    ctx.fillRect(screenX + 10 + graphWidth, y, 1.2, 1);
+                }
+
+                // B. Pola Garis Terang di Layar (Sangat tipis dan terpisah jauh)
+                ctx.fillStyle = `rgba(${colorObj.r}, ${colorObj.g}, ${colorObj.b}, ${intensity})`;
+                ctx.fillRect(canvas.width - 100, y, 100, 1);
+            }
+
+            // Garis pembatas layar
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(screenX, 0);
+            ctx.lineTo(screenX, canvas.height);
+            ctx.stroke();
+
+            // Label Teks Layar
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 11px Arial";
+            ctx.fillText("GRAFIK INTENSITAS KISI", screenX + 12, 20);
+            ctx.fillText("GARIS SPEKTRUM", canvas.width - 110, 20);
+            
+            // Garis bantu jarak L
+            ctx.strokeStyle = "#666";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(slitX + 12, canvas.height - 25);
+            ctx.lineTo(screenX, canvas.height - 25);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = "#aaa";
+            ctx.font = "11px sans-serif";
+            ctx.fillText(`Jarak Layar (L) = ${L.toFixed(1)} m`, (slitX + screenX)/2 - 50, canvas.height - 12);
+
+            requestAnimationFrame(drawSimulation);
+        }
+
+        // Listener input slider
+        wlInput.addEventListener('input', drawSimulation);
+        NInput.addEventListener('input', drawSimulation);
+        LInput.addEventListener('input', drawSimulation);
+
+        // Jalankan render awal
+        drawSimulation();
+    </script>
+</body>
+</html>
