@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simulasi Pembiasan Cahaya Pro</title>
+    <title>Simulasi Optik Pembiasan</title>
     <style>
         :root {
             --bg-color: #1a1a24;
@@ -25,45 +25,47 @@
 
         .main-wrapper {
             width: 100%;
-            max-width: 600px;
+            max-width: 500px; /* Lebar standar HP yang nyaman */
             display: flex;
             flex-direction: column;
-            gap: 15px;
         }
 
         h1 {
             font-size: 1.1rem;
             text-align: center;
-            margin: 10px 0;
+            margin: 10px 0 15px 0;
             color: var(--accent-color);
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
+        /* AREA CANVAS */
         .canvas-container {
             width: 100%;
             touch-action: none;
             background: #000;
-            border-radius: 12px;
+            border-radius: 12px 12px 0 0; /* Melengkung di atas saja */
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             border: 1px solid rgba(255,255,255,0.1);
+            border-bottom: none;
         }
 
         canvas {
             display: block;
             width: 100%;
             height: auto;
-            aspect-ratio: 4 / 3;
+            aspect-ratio: 1 / 1; /* Diubah ke 1:1 agar lebih kotak dan pas di HP */
         }
 
+        /* AREA KONTROL */
         .control-section {
             background: var(--panel-color);
-            padding: 15px;
-            border-radius: 12px;
+            padding: 20px 15px;
+            border-radius: 0 0 12px 12px; /* Melengkung di bawah saja */
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-sizing: border-box;
         }
 
         .control-group {
@@ -93,6 +95,7 @@
             width: 100%;
             height: 30px;
             accent-color: var(--accent-color);
+            cursor: pointer;
         }
 
         .data-grid {
@@ -113,26 +116,26 @@
 
         .data-item b {
             display: block;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #fff;
             margin-top: 3px;
         }
 
         .help-text {
             font-size: 0.75rem;
-            color: #00adb5;
+            color: #888;
             text-align: center;
-            font-weight: 500;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
 
     <div class="main-wrapper">
-        <h1>Simulasi Optik: Pembiasan</h1>
+        <h1>Simulasi Pembiasan</h1>
 
         <div class="canvas-container">
-            <canvas id="simCanvas" width="800" height="600"></canvas>
+            <canvas id="simCanvas" width="600" height="600"></canvas>
         </div>
 
         <div class="control-section">
@@ -153,12 +156,12 @@
             </div>
 
             <div class="data-grid">
-                <div class="data-item">Sudut Datang<b id="data-theta1">0.0°</b></div>
-                <div class="data-item">Sudut Bias<b id="data-theta2">0.0°</b></div>
-                <div class="data-item">Sudut Pantul<b id="data-reflect">0.0°</b></div>
+                <div class="data-item">Sdt Datang<b id="data-theta1">0.0°</b></div>
+                <div class="data-item">Sdt Bias<b id="data-theta2">0.0°</b></div>
+                <div class="data-item">Sdt Pantul<b id="data-reflect">0.0°</b></div>
             </div>
 
-            <p class="help-text">● Geser lingkaran pada laser untuk memutar sinar</p>
+            <p class="help-text">Sentuh & geser lingkaran merah pada laser</p>
         </div>
     </div>
 
@@ -177,7 +180,7 @@
 
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
-        let laserRadius = 250; 
+        let laserRadius = 220; 
         let laserAngle = Math.PI + Math.PI / 4; 
         let isDragging = false;
 
@@ -186,7 +189,7 @@
             if (n <= 1.33) return "Air";
             if (n <= 1.50) return "Kaca";
             if (n <= 2.42) return "Intan";
-            return "Custom";
+            return "Lensa";
         }
 
         function getPos(e) {
@@ -203,7 +206,7 @@
             const pos = getPos(e);
             const lx = centerX + laserRadius * Math.cos(laserAngle);
             const ly = centerY + laserRadius * Math.sin(laserAngle);
-            if (Math.hypot(pos.x - lx, pos.y - ly) < 50) isDragging = true;
+            if (Math.hypot(pos.x - lx, pos.y - ly) < 60) isDragging = true;
         }
 
         function handleMove(e) {
@@ -235,31 +238,21 @@
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Mediums
-            ctx.fillStyle = "#1e293b"; 
-            ctx.fillRect(0, 0, canvas.width, centerY);
-            ctx.fillStyle = `rgba(0, 173, 181, ${Math.min(0.1 + (n2 - 1) * 0.3, 0.45)})`;
+            // Backgrounds
+            ctx.fillStyle = "#1e293b"; ctx.fillRect(0, 0, canvas.width, centerY);
+            ctx.fillStyle = `rgba(0, 173, 181, ${Math.min(0.1 + (n2 - 1) * 0.3, 0.4)})`;
             ctx.fillRect(0, centerY, canvas.width, centerY);
 
-            // Labels on Canvas
-            ctx.fillStyle = "rgba(255,255,255,0.7)";
-            ctx.font = "bold 20px Arial";
-            ctx.fillText(`n₁ = ${n1.toFixed(2)}`, 20, 40);
-            ctx.fillText(`n₂ = ${n2.toFixed(2)}`, 20, canvas.height - 30);
-
-            // Normal line
-            ctx.setLineDash([10, 10]); ctx.strokeStyle = "rgba(255,255,255,0.2)";
+            // Interface & Normal
+            ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(canvas.width, centerY); ctx.stroke();
+            ctx.setLineDash([8, 8]); ctx.strokeStyle = "rgba(255,255,255,0.2)";
             ctx.beginPath(); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, canvas.height); ctx.stroke();
             ctx.setLineDash([]);
-            
-            // Interface line
-            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(canvas.width, centerY); ctx.stroke();
 
             // Physics
             let theta1 = Math.abs(laserAngle - (-Math.PI / 2));
             if (laserAngle > -Math.PI / 2) theta1 = Math.abs(laserAngle + Math.PI / 2);
-            
             const sinTheta2 = (n1 * Math.sin(theta1)) / n2;
             let tir = sinTheta2 > 1.0;
             let theta2 = tir ? 0 : Math.asin(sinTheta2);
@@ -272,23 +265,21 @@
             const lx = centerX + laserRadius * Math.cos(laserAngle);
             const ly = centerY + laserRadius * Math.sin(laserAngle);
             
-            // 1. SINAR DATANG (Utama - Tebal)
-            ctx.lineWidth = 4; ctx.shadowBlur = 10; ctx.shadowColor = "#ff3333"; ctx.strokeStyle = "#ff3333";
+            // Sinar Datang
+            ctx.lineWidth = 4; ctx.shadowBlur = 8; ctx.shadowColor = "#ff3333"; ctx.strokeStyle = "#ff3333";
             ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(centerX, centerY); ctx.stroke();
 
-            // 2. SINAR PANTUL (Tipis & Transparan)
-            // Intensitas sangat rendah kecuali jika TIR (Total Internal Reflection)
-            let reflectAlpha = tir ? 0.8 : 0.15; 
-            ctx.shadowBlur = tir ? 10 : 0;
-            ctx.lineWidth = 2; // Tipis saja
-            ctx.strokeStyle = `rgba(255, 51, 51, ${reflectAlpha})`;
+            // Sinar Pantul (Sangat Tipis)
+            let refAlpha = tir ? 0.7 : 0.15;
+            ctx.lineWidth = 1.5; ctx.shadowBlur = tir ? 8 : 0;
+            ctx.strokeStyle = `rgba(255, 51, 51, ${refAlpha})`;
             const rAng = fromLeft ? -Math.PI/2 + theta1 : -Math.PI/2 - theta1;
             ctx.beginPath(); ctx.moveTo(centerX, centerY);
             ctx.lineTo(centerX + 400 * Math.cos(rAng), centerY + 400 * Math.sin(rAng)); ctx.stroke();
 
-            // 3. SINAR BIAS (Utama - Tebal)
+            // Sinar Bias
             if (!tir) {
-                ctx.lineWidth = 4; ctx.shadowBlur = 10; ctx.strokeStyle = "#ff3333";
+                ctx.lineWidth = 4; ctx.shadowBlur = 8; ctx.strokeStyle = "#ff3333";
                 const reAng = fromLeft ? Math.PI/2 - theta2 : Math.PI/2 + theta2;
                 ctx.beginPath(); ctx.moveTo(centerX, centerY);
                 ctx.lineTo(centerX + 500 * Math.cos(reAng), centerY + 500 * Math.sin(reAng)); ctx.stroke();
@@ -298,16 +289,20 @@
             ctx.shadowBlur = 0;
             ctx.save();
             ctx.translate(lx, ly); ctx.rotate(laserAngle + Math.PI);
-            ctx.fillStyle = "#475569"; ctx.fillRect(-25, -15, 50, 30);
-            ctx.fillStyle = isDragging ? "#00adb5" : "#e11d48";
-            ctx.beginPath(); ctx.arc(0, 0, 12, 0, 7); ctx.fill();
-            ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+            ctx.fillStyle = "#475569"; ctx.fillRect(-20, -12, 40, 24);
+            ctx.fillStyle = isDragging ? "#00adb5" : "#ff3333";
+            ctx.beginPath(); ctx.arc(0, 0, 10, 0, 7); ctx.fill();
             ctx.restore();
+
+            // Indikator n1 & n2 di canvas
+            ctx.fillStyle = "rgba(255,255,255,0.5)";
+            ctx.font = "bold 14px Arial";
+            ctx.fillText(`n₁ = ${n1.toFixed(2)}`, 15, 25);
+            ctx.fillText(`n₂ = ${n2.toFixed(2)}`, 15, canvas.height - 15);
         }
 
         [n1Slider, n2Slider].forEach(s => s.addEventListener('input', draw));
         draw();
     </script>
 </body>
-Dwi Yono, S.Pd Guru Fisika SMAN 1 Karanganyar
 </html>
