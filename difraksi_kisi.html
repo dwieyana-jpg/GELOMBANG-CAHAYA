@@ -14,7 +14,7 @@
 
         body {
             margin: 0;
-            padding: 20px;
+            padding: 10px; /* Diperkecil agar lebih luas di HP */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
@@ -25,33 +25,38 @@
 
         h1 {
             margin-bottom: 5px;
-            font-size: 24px;
+            font-size: 20px; /* Sedikit diperkecil untuk HP */
             color: var(--accent-color);
+            text-align: center;
         }
 
         p.subtitle {
             margin-top: 0;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: #888;
-            font-size: 14px;
+            font-size: 12px;
+            text-align: center;
         }
 
+        /* Berubah dari flex horizontal menjadi flex vertikal (kolom) */
         .main-container {
             display: flex;
-            gap: 20px;
-            max-width: 1200px;
+            flex-direction: column; 
+            gap: 15px;
+            max-width: 700px; /* Disesuaikan dengan lebar canvas */
             width: 100%;
             background: var(--panel-color);
-            padding: 20px;
+            padding: 15px;
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            box-sizing: border-box;
         }
 
         .canvas-container {
-            flex: 2;
+            width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
         }
 
         .playback-controls {
@@ -59,7 +64,7 @@
             gap: 10px;
             justify-content: center;
             background: #222;
-            padding: 10px;
+            padding: 8px;
             border-radius: 8px;
         }
 
@@ -67,12 +72,13 @@
             background: #444;
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
+            padding: 10px 14px; /* Tombol dibuat lebih tebal agar mudah ditekan jari */
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
             font-size: 13px;
             transition: all 0.2s;
+            touch-action: manipulation; /* Optimasi respons sentuhan di HP */
         }
 
         .btn:hover {
@@ -89,25 +95,25 @@
             background: #000;
             border-radius: 8px;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-            width: 100%;
-            height: auto;
+            width: 100%; /* Agar fleksibel mengikuti lebar layar HP */
+            height: auto; /* Menjaga rasio aspek canvas */
         }
 
+        /* Panel kontrol sekarang otomatis di bawah canvas */
         .control-panel {
-            flex: 1;
             background: #222;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            min-width: 280px;
+            gap: 15px;
+            box-sizing: border-box;
         }
 
         .control-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         label {
@@ -121,19 +127,21 @@
             color: var(--accent-color);
         }
 
+        /* Slider dibuat sedikit lebih tebal agar ramah anak-anak */
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
-            height: 6px;
+            height: 10px; /* Dipertebal dari 6px */
             background: #444;
-            border-radius: 3px;
+            border-radius: 5px;
             outline: none;
         }
 
+        /* Bulatan slider (Thumb) diperbesar agar mudah digeser jari anak-anak */
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
+            width: 24px; /* Diperbesar dari 18px */
+            height: 24px; /* Diperbesar dari 18px */
             background: var(--accent-color);
             border-radius: 50%;
             cursor: pointer;
@@ -141,12 +149,12 @@
         }
 
         input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
+            transform: scale(1.1);
         }
 
         .data-display {
             background: #111;
-            padding: 15px;
+            padding: 12px;
             border-radius: 6px;
             border-left: 4px solid var(--accent-color);
             font-family: monospace;
@@ -166,20 +174,22 @@
 <body>
 
     <h1>Simulasi Laboratorium Kisi Difraksi</h1>
-    <p class="subtitle">Eksperimen Optik Fisis - Interferensi Banyak Celah (PhET Style)</p>
+    <p class="subtitle">Eksperimen Optik Fisis - Interferensi Banyak Celah)</p>
 
     <div class="main-container">
+        <!-- Area Canvas & Tombol Playback di Atas -->
         <div class="canvas-container">
+            <canvas id="simCanvas" width="700" height="450"></canvas>
+            
             <div class="playback-controls">
                 <button id="btnPausePlay" class="btn active">⏸ Pause</button>
                 <div style="border-left: 1px solid #444; margin: 0 5px;"></div>
-                <button id="btnNormal" class="btn active">Normal Speed</button>
+                <button id="btnNormal" class="btn active">Normal</button>
                 <button id="btnSlow" class="btn">Slow Motion</button>
             </div>
-            
-            <canvas id="simCanvas" width="700" height="450"></canvas>
         </div>
 
+        <!-- Area Kontrol / Slider Pindah ke Bawah -->
         <div class="control-panel">
             <h3>Kontrol Eksperimen</h3>
             <hr style="border: 0; border-top: 1px solid #444; margin-top: -10px;">
@@ -190,12 +200,12 @@
             </div>
 
             <div class="control-group">
-                <label>Kerapatan Kisi, N :<span id="N-val">300</span> garis/mm</label>
+                <label>Kerapatan Kisi, N : <span id="N-val">300</span> garis/mm</label>
                 <input type="range" id="gratingDensity" min="100" max="600" step="50" value="300">
             </div>
 
             <div class="control-group">
-                <label>Jarak Layar, L :<span id="L-val">2.0</span> m</label>
+                <label>Jarak Layar, L : <span id="L-val">2.0</span> m</label>
                 <input type="range" id="screenDistance" min="1.0" max="3.0" step="0.1" value="2.0">
             </div>
 
@@ -207,7 +217,7 @@
             <div class="legend">
                 <strong>Karakteristik Efek Banyak Celah (Kisi):</strong><br>
                 • <b>Garis Terang Sangat Tajam:</b> Berbeda dari celah tunggal/ganda, kisi menghasilkan garis pita yang sangat tipis dan terpisah tegas.<br>
-                • <b>Makin Rapat Kisi (N membesar):</b> Jarak antar garis terang (d.sin θ = m.λ) akan "semakin renggang" secara signifikan di layar.
+                • <b>Makin Rapat Kisi (N membesar):</b> Jarak antar garis terang akan "semakin renggang" secara signifikan di layar.
             </div>
         </div>
     </div>
@@ -319,11 +329,11 @@
             ctx.font = "11px sans-serif";
             ctx.fillText("SUMBER LASER", 20, centerY + 4);
 
-            // Kisi Difraksi (Banyak celah kecil digambar berlapis secara visual)
+            // Kisi Difraksi
             ctx.fillStyle = "#444";
             ctx.fillRect(slitX, 0, 12, canvas.height);
             
-            // Menggambar garis-garis kisi halus secara visual di alat penghalang
+            // Menggambar garis-garis kisi halus secara visual
             ctx.strokeStyle = "#111";
             ctx.lineWidth = 1;
             for (let i = 0; i < canvas.height; i += 6) {
@@ -339,13 +349,12 @@
                 time += speedMultiplier;
             }
 
-            // 2. Render Animasi Gelombang Kisi (Banyak berkas cahaya lurus tajam)
+            // 2. Render Animasi Gelombang Kisi
             ctx.save();
             ctx.beginPath();
             ctx.rect(slitX + 12, 0, screenX - slitX - 12, canvas.height);
             ctx.clip();
 
-            // Faktor skala visualisasi berkas garis interferensi konstruktif
             const visualScaleFactor = (N / lambda) * 160; 
 
             for (let r = 5; r < 340; r += 16) {
@@ -353,7 +362,6 @@
                 ctx.strokeStyle = `rgba(${colorObj.r}, ${colorObj.g}, ${colorObj.b}, ${waveIntensity})`;
                 ctx.lineWidth = 1.5;
                 
-                // Pada kisi, muka gelombang yang dominan terlihat menjalar adalah pada sudut-sudut orde terang spesifik saja
                 ctx.beginPath();
                 ctx.arc(slitX + 12, centerY, r, -Math.PI/2.3, Math.PI/2.3);
                 ctx.stroke();
@@ -366,18 +374,12 @@
 
             for (let y = 0; y < canvas.height; y++) {
                 const yOffset = y - centerY;
-                
-                // Pemodelan fisis intensitas interferensi banyak celah (N-slit)
-                // Menggunakan fungsi tajam berpuncak tinggi (pendekatan dirac-delta / fungsi interferensi kisi murni)
                 const phase = yOffset * visualScaleFactor * 0.0003;
-                
-                // Rumus matematika untuk ketajaman puncak interferensi kisi
-                // Semakin besar N, pangkat pengali mempertajam kurva agar tidak melebar seperti celah ganda
                 const interference = Math.pow(Math.abs(Math.sin(10 * phase) / (10 * Math.sin(phase) || 1)), 2);
-                const decayFactor = Math.exp(-Math.pow(yOffset / 220, 2)); // Sedikit redaman alami lensa/layar
+                const decayFactor = Math.exp(-Math.pow(yOffset / 220, 2)); 
                 const intensity = interference * decayFactor;
 
-                // A. Grafik Intensitas Kisi yang Sangat Lancip/Tajam
+                // A. Grafik Intensitas
                 const graphWidth = intensity * 120;
                 ctx.fillStyle = `rgba(${colorObj.r}, ${colorObj.g}, ${colorObj.b}, 0.5)`;
                 ctx.fillRect(screenX + 10, y, graphWidth, 1);
@@ -387,7 +389,7 @@
                     ctx.fillRect(screenX + 10 + graphWidth, y, 1.2, 1);
                 }
 
-                // B. Pola Garis Terang di Layar (Sangat tipis dan terpisah jauh)
+                // B. Pola Garis Terang di Layar
                 ctx.fillStyle = `rgba(${colorObj.r}, ${colorObj.g}, ${colorObj.b}, ${intensity})`;
                 ctx.fillRect(canvas.width - 100, y, 100, 1);
             }
