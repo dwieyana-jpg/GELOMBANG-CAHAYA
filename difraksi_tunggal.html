@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulasi Difraksi Celah Tunggal (PhET Advanced)</title>
+    <title>Simulasi Difraksi Celah Tunggal (Advanced Lab)</title>
     <style>
         :root {
-            --bg-color: #1a1a1a;
-            --panel-color: #2d2d2d;
-            --text-color: #ffffff;
-            --accent-color: #ff9f43;
+            --bg-color: #121214;
+            --panel-color: #1e1e24;
+            --panel-inner: #2a2a32;
+            --text-color: #f1f2f6;
+            --accent-color: #00d2d3;
+            --slider-thumb: #ff9f43;
         }
 
         body {
             margin: 0;
             padding: 20px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
@@ -23,118 +25,144 @@
             align-items: center;
         }
 
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
         h1 {
-            margin-bottom: 5px;
+            margin: 0 0 5px 0;
             font-size: 24px;
             color: var(--accent-color);
+            letter-spacing: 0.5px;
         }
 
         p.subtitle {
-            margin-top: 0;
-            margin-bottom: 20px;
-            color: #888;
-            font-size: 14px;
+            margin: 0;
+            color: #a0a0aa;
+            font-size: 13px;
         }
 
+        /* Container utama diubah susunannya menjadi kolom vertikal */
         .main-container {
             display: flex;
-            gap: 20px;
-            max-width: 1200px;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 800px;
             width: 100%;
             background: var(--panel-color);
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            border-radius: 14px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+            box-sizing: border-box;
         }
 
-        .canvas-container {
-            flex: 2;
+        canvas {
+            background: #000000;
+            border-radius: 8px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            width: 100%;
+            height: auto;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        /* Panel Kontrol di bawah Canvas */
+        .bottom-panel {
+            background: var(--panel-inner);
+            padding: 15px;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
 
-        .playback-controls {
+        /* Baris Kontrol Playback Atas */
+        .playback-row {
             display: flex;
             gap: 10px;
-            justify-content: center;
-            background: #222;
-            padding: 10px;
+            align-items: center;
+            background: #121214;
+            padding: 8px 12px;
             border-radius: 8px;
+            justify-content: flex-start;
         }
 
         .btn {
-            background: #444;
+            background: #3a3a44;
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
+            padding: 8px 14px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 13px;
-            transition: all 0.2s;
+            font-size: 12px;
+            transition: all 0.2s ease;
         }
 
         .btn:hover {
-            background: #555;
+            background: #4e4e5a;
         }
 
         .btn.active {
-            background: var(--accent-color);
-            color: #000;
-            box-shadow: 0 0 10px var(--accent-color);
+            background: var(--slider-thumb);
+            color: #121214;
+            box-shadow: 0 0 10px rgba(255, 159, 67, 0.3);
         }
 
-        canvas {
-            background: #000;
-            border-radius: 8px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-            width: 100%;
-            height: auto;
+        /* Grid untuk Slider dan Tampilan Data Numerik */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
         }
 
-        .control-panel {
-            flex: 1;
-            background: #222;
-            padding: 20px;
-            border-radius: 8px;
+        @media (max-width: 600px) {
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sliders-zone {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            min-width: 280px;
+            gap: 12px;
         }
 
         .control-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 4px;
         }
 
         label {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             display: flex;
             justify-content: space-between;
+            color: #d1d1d6;
         }
 
         label span {
-            color: var(--accent-color);
+            color: var(--slider-thumb);
+            font-family: monospace;
+            font-size: 13px;
         }
 
         input[type="range"] {
             -webkit-appearance: none;
+            appearance: none;
             width: 100%;
             height: 6px;
-            background: #444;
+            background: #121214;
             border-radius: 3px;
             outline: none;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: var(--accent-color);
+            width: 16px;
+            height: 16px;
+            background: var(--slider-thumb);
             border-radius: 50%;
             cursor: pointer;
             transition: transform 0.1s;
@@ -144,80 +172,126 @@
             transform: scale(1.2);
         }
 
-        .data-display {
-            background: #111;
-            padding: 15px;
-            border-radius: 6px;
-            border-left: 4px solid var(--accent-color);
-            font-family: monospace;
-            font-size: 13px;
+        /* Sisi Kanan: Panel Data Hasil Kalkulasi */
+        .data-zone {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .data-display {
+            background: #121214;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--accent-color);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .data-val {
+            color: var(--accent-color);
+            font-weight: bold;
         }
 
         .legend {
-            font-size: 12px;
-            color: #aaa;
+            font-size: 11px;
+            color: #a0a0aa;
             line-height: 1.5;
+            background: rgba(0,0,0,0.15);
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        
+        footer {
+            margin-top: 15px;
+            font-size: 11px;
+            color: #666;
         }
     </style>
 </head>
 <body>
 
-    <h1>Simulasi Laboratorium Difraksi Celah Tunggal</h1>
-    <p class="subtitle">Eksperimen Optik Fisis - Lenturan Gelombang Cahaya</p>
+    <header>
+        <h1>Simulasi Laboratorium Difraksi Celah Tunggal</h1>
+        <p class="subtitle">Eksperimen Optik Fisis — Prinsip Huygens-Fresnel</p>
+    </header>
 
     <div class="main-container">
-        <div class="canvas-container">
-            <div class="playback-controls">
+        <!-- AREA 1: CANVAS VISUALISASI UTAMA -->
+        <canvas id="simCanvas" width="760" height="380"></canvas>
+
+        <!-- AREA 2: PANEL KONTROL DI BAWAH CANVAS -->
+        <div class="bottom-panel">
+            
+            <!-- Baris Playback Kontrol -->
+            <div class="playback-row">
                 <button id="btnPausePlay" class="btn active">⏸ Pause</button>
-                <div style="border-left: 1px solid #444; margin: 0 5px;"></div>
+                <div style="border-left: 1px solid #3a3a44; height: 16px; margin: 0 4px;"></div>
                 <button id="btnNormal" class="btn active">Normal Speed</button>
                 <button id="btnSlow" class="btn">Slow Motion</button>
             </div>
-            
-            <canvas id="simCanvas" width="700" height="450"></canvas>
-        </div>
 
-        <div class="control-panel">
-            <h3>Kontrol Eksperimen</h3>
-            <hr style="border: 0; border-top: 1px solid #444; margin-top: -10px;">
+            <!-- Grid Parameter & Output Real-time -->
+            <div class="controls-grid">
+                
+                <!-- Kiri: Bagian Kontrol Input Slider -->
+                <div class="sliders-zone">
+                    <div class="control-group">
+                        <label>Panjang Gelombang (&lambda;) (<span id="lambda-val">550</span> nm)</label>
+                        <input type="range" id="wavelength" min="400" max="700" value="550">
+                    </div>
 
-            <div class="control-group">
-                <label>Panjang Gelombang (<span id="lambda-val">550</span> nm)</label>
-                <input type="range" id="wavelength" min="400" max="700" value="550">
-            </div>
+                    <div class="control-group">
+                        <label>Lebar Celah (a) (<span id="a-val">15.0</span> &mu;m)</label>
+                        <input type="range" id="slitWidth" min="6" max="35" step="0.5" value="15">
+                    </div>
 
-            <div class="control-group">
-                <label>Lebar Celah, a (<span id="a-val">15</span> &mu;m)</label>
-                <input type="range" id="slitWidth" min="8" max="40" value="15">
-            </div>
+                    <div class="control-group">
+                        <label>Jarak Layar (L) (<span id="L-val">2.0</span> m)</label>
+                        <input type="range" id="screenDistance" min="1.0" max="3.0" step="0.1" value="2.0">
+                    </div>
+                </div>
 
-            <div class="control-group">
-                <label>Jarak Layar, L (<span id="L-val">2.0</span> m)</label>
-                <input type="range" id="screenDistance" min="1.0" max="3.0" step="0.1" value="2.0">
-            </div>
+                <!-- Kanan: Bagian Hasil Pengukuran Spektrum -->
+                <div class="data-zone">
+                    <div class="data-display">
+                        <div class="data-row">
+                            <span>Frekuensi:</span>
+                            <span class="data-val"><span id="freq-val">545.5</span> THz</span>
+                        </div>
+                        <div class="data-row">
+                            <span>Lebar Terang Pusat:</span>
+                            <span class="data-val"><span id="centerWidth-val">146.67</span> mm</span>
+                        </div>
+                    </div>
+                    <div class="legend">
+                        Rumus Lebar Pita Terang Pusat:<br>
+                        Δy = 2.𝜆.L/a
+                    </div>
+                </div>
 
-            <div class="data-display">
-                <div>Lebar Terang Pusat (2y): <span id="centerWidth-val">0.00</span> mm</div>
-                <div>Frekuensi: <span id="freq-val">0.00</span> THz</div>
-            </div>
-
-            <div class="legend">
-                <strong>Karakteristik Difraksi Celah Tunggal:</strong><br>
-                • <b>Terang Pusat Luar Biasa Lebar:</b> Lebar terang pusat bernilai dua kali lipat (2y) dibanding terang orde lainnya.<br>
-                • <b>Makin Sempit Celah (a mengecil):</b> Pola difraksi di layar justru akan semakin "melebar" dan meluas.<br>
-                • Perhatikan grafik intensitas sekunder yang mengecil drastis di luar area pusat.
             </div>
         </div>
     </div>
+
+    <footer>
+        Media Pembelajaran Fisika SMAN 1 Karanganyar
+    </footer>
 
     <script>
         const canvas = document.getElementById('simCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Elemen UI
+        // Selektor Elemen
         const wlInput = document.getElementById('wavelength');
         const aInput = document.getElementById('slitWidth');
         const LInput = document.getElementById('screenDistance');
@@ -231,34 +305,34 @@
         const btnNormal = document.getElementById('btnNormal');
         const btnSlow = document.getElementById('btnSlow');
 
-        // State Animasi
+        // State Kontrol Sistem
         let time = 0;
         let isPaused = false;
-        let speedMultiplier = 0.2; 
+        let baseSpeed = 0.15;
+        let speedMultiplier = 1.0; 
 
-        // Listener Kontrol Animasi
+        // Event Listeners Kontrol Animasi
         btnPausePlay.addEventListener('click', () => {
             isPaused = !isPaused;
             btnPausePlay.innerText = isPaused ? "▶ Play" : "⏸ Pause";
-            if (isPaused) btnPausePlay.classList.remove('active');
-            else btnPausePlay.classList.add('active');
+            btnPausePlay.classList.toggle('active', !isPaused);
         });
 
         btnNormal.addEventListener('click', () => {
-            speedMultiplier = 0.2;
+            speedMultiplier = 1.0;
             btnNormal.classList.add('active');
             btnSlow.classList.remove('active');
         });
 
         btnSlow.addEventListener('click', () => {
-            speedMultiplier = 0.04;
+            speedMultiplier = 0.25;
             btnSlow.classList.add('active');
             btnNormal.classList.remove('active');
         });
 
-        // Konversi Spektrum Warna Optik
+        // Alur Konversi Panjang Gelombang ke Spektrum Warna RGB
         function wavelengthToRGB(wavelength) {
-            let r, g, b, alpha;
+            let r, g, b;
             if (wavelength >= 380 && wavelength < 440) {
                 r = -((wavelength - 440) / (440 - 380)); g = 0.0; b = 1.0;
             } else if (wavelength >= 440 && wavelength < 490) {
@@ -275,128 +349,129 @@
                 r = 0.0; g = 0.0; b = 0.0;
             }
 
-            if (wavelength >= 380 && wavelength < 420) alpha = 0.3 + 0.7 * (wavelength - 380) / (420 - 380);
-            else if (wavelength >= 420 && wavelength <= 700) alpha = 1.0;
-            else if (wavelength >= 700 && wavelength <= 780) alpha = 0.3 + 0.7 * (780 - wavelength) / (780 - 700);
-            else alpha = 0;
+            let factor;
+            if (wavelength >= 380 && wavelength < 420) factor = 0.3 + 0.7 * (wavelength - 380) / (420 - 380);
+            else if (wavelength >= 420 && wavelength <= 700) factor = 1.0;
+            else if (wavelength >= 700 && wavelength <= 780) factor = 0.3 + 0.7 * (780 - wavelength) / (780 - 700);
+            else factor = 0;
 
             return {
-                r: Math.round(r * 255),
-                g: Math.round(g * 255),
-                b: Math.round(b * 255),
-                rgbaStr: `rgba(${Math.round(r*255)}, ${Math.round(g*255)}, ${Math.round(b*255)}, ${alpha})`
+                r: Math.round(r * factor * 255),
+                g: Math.round(g * factor * 255),
+                b: Math.round(b * factor * 255)
             };
         }
 
         function drawSimulation() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const lambda = parseFloat(wlInput.value); // nm
-            const a = parseFloat(aInput.value); // um
-            const L = parseFloat(LInput.value); // m
+            // Parsing Data Parameter Fisis
+            const lambda = parseFloat(wlInput.value); 
+            const a = parseFloat(aInput.value); 
+            const L = parseFloat(LInput.value); 
 
+            // Update UI Teks
             lambdaVal.innerText = lambda;
-            aVal.innerText = a;
+            aVal.innerText = a.toFixed(1);
             LVal.innerText = L.toFixed(1);
 
-            // Rumus Fisis Lebar Terang Pusat Celah Tunggal: 2y = 2 * (lambda * L) / a
-            const yReal = (lambda * 1e-9 * L) / (a * 1e-6); 
-            const centerWidth = 2 * yReal; 
-            centerWidthVal.innerText = (centerWidth * 1000).toFixed(3); // mm
-            
+            // Perhitungan Parameter Fisika Real
             const c = 3e8;
-            const freq = c / (lambda * 1e-9);
-            freqVal.innerText = (freq / 1e12).toFixed(1);
+            const frequency = c / (lambda * 1e-9);
+            freqVal.innerText = (frequency / 1e12).toFixed(1);
 
-            const colorObj = wavelengthToRGB(lambda);
+            const centerWidth = (2 * lambda * 1e-9 * L) / (a * 1e-6);
+            centerWidthVal.innerText = (centerWidth * 1000).toFixed(2);
 
-            const slitX = 140;
-            const screenX = 460;
+            const color = wavelengthToRGB(lambda);
+            const colorStr = `rgb(${color.r}, ${color.g}, ${color.b})`;
+
+            // Batas geometri visualisasi konstan di dalam Canvas yang lebih lebar (760px)
+            const slitX = 150;
+            const screenX = 500;
             const centerY = canvas.height / 2;
-            const slitDisplaySize = a * 1.2; // Representasi visual celah tunggal
+            const visualSlitHalf = Math.max(3, a * 0.8);
 
-            // 1. Gambar Komponen Fisik (Laser Sumber)
-            ctx.fillStyle = colorObj.rgbaStr;
-            ctx.fillRect(0, centerY - 20, slitX, 40);
+            // A. Sinar Cahaya Laser Kiri
+            let laserGrad = ctx.createLinearGradient(0, centerY, slitX, centerY);
+            laserGrad.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, 0.1)`);
+            laserGrad.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 0.8)`);
+            ctx.fillStyle = laserGrad;
+            ctx.fillRect(0, centerY - 15, slitX, 30);
+            
             ctx.fillStyle = "#fff";
-            ctx.font = "11px sans-serif";
+            ctx.font = "10px sans-serif";
             ctx.fillText("SUMBER LASER", 20, centerY + 4);
 
-            // Penghalang Atas & Bawah (Membentuk 1 Celah di Tengah)
-            ctx.fillStyle = "#444";
-            ctx.fillRect(slitX, 0, 12, centerY - slitDisplaySize / 2);
-            ctx.fillRect(slitX, centerY + slitDisplaySize / 2, 12, canvas.height - (centerY + slitDisplaySize / 2));
+            // B. Batas Penghalang Kisi Celah
+            ctx.fillStyle = "#4e4e5a";
+            ctx.fillRect(slitX, 0, 10, centerY - visualSlitHalf);
+            ctx.fillRect(slitX, centerY + visualSlitHalf, 10, canvas.height - (centerY + visualSlitHalf));
 
-            // Panah Penunjuk Ukuran Lebar Celah (a)
+            // Indikator Dimensi Lebar Celah "a"
             ctx.strokeStyle = "#ff9f43";
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.moveTo(slitX - 15, centerY - slitDisplaySize/2);
-            ctx.lineTo(slitX - 15, centerY + slitDisplaySize/2);
+            ctx.moveTo(slitX - 10, centerY - visualSlitHalf);
+            ctx.lineTo(slitX - 10, centerY + visualSlitHalf);
             ctx.stroke();
             ctx.fillStyle = "#ff9f43";
-            ctx.fillText("a", slitX - 25, centerY + 4);
+            ctx.font = "bold 11px sans-serif";
+            ctx.fillText("a", slitX - 22, centerY + 4);
 
+            // Perhitungan Akumulasi Waktu Fasa Gelombang
             if (!isPaused) {
-                time += speedMultiplier;
+                const dynamicFreqFactor = (frequency / 5.4e14);
+                time += baseSpeed * speedMultiplier * dynamicFreqFactor;
             }
 
-            // 2. Render Animasi Gelombang Terdifraksi (Menyebar dari Celah Tunggal)
+            // C. Rambatan Gelombang Difraksi (Prinsip Huygens)
             ctx.save();
             ctx.beginPath();
-            ctx.rect(slitX + 12, 0, screenX - slitX - 12, canvas.height);
+            ctx.rect(slitX + 10, 0, screenX - slitX - 10, canvas.height);
             ctx.clip();
 
-            for (let r = 5; r < 340; r += 16) {
-                let waveIntensity = (1 + Math.sin(r * 0.15 - time)) * 0.4;
-                ctx.strokeStyle = `rgba(${colorObj.r}, ${colorObj.g}, ${colorObj.b}, ${waveIntensity})`;
-                ctx.lineWidth = 2;
+            for (let r = 8; r < (screenX - slitX); r += 16) {
+                let wavePhase = r * 0.25 - time;
+                let intensityProfile = (1 + Math.sin(wavePhase)) * 0.35;
+                let distanceDecay = Math.max(0.1, 1 - (r / (screenX - slitX)));
                 
+                ctx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${intensityProfile * distanceDecay})`;
+                ctx.lineWidth = 3;
                 ctx.beginPath();
-                // Busur melengkung menyebar keluar dari titik tengah celah tunggal
-                ctx.arc(slitX + 12, centerY, r, -Math.PI/2.3, Math.PI/2.3);
+                ctx.arc(slitX + 10, centerY, r, -Math.PI/2.5, Math.PI/2.5);
                 ctx.stroke();
             }
             ctx.restore();
 
-            // 3. Render Matematika Grafik Sinc & Pola Pita Layar
-            ctx.fillStyle = "#050505";
-            ctx.fillRect(screenX, 0, canvas.width - screenX, canvas.height);
-
-            // Skala matematis untuk mentranslasikan piksel canvas ke fungsi difraksi fraunhofer asli
-            const visualScaleFactor = (a / (lambda * L)) * 75; 
+            // D. Plotting Grafik Kontinu Fraunhofer Sinc Square
+            const scalingFactor = (a / (lambda * L)) * 78;
 
             for (let y = 0; y < canvas.height; y++) {
                 const yOffset = y - centerY;
-                
-                // Menghitung Beta (sudut fase difraksi)
-                // beta = (pi * a * y) / (lambda * L)
-                const beta = yOffset * visualScaleFactor * 0.01;
+                const beta = yOffset * scalingFactor * 0.012;
                 
                 let intensity = 0;
                 if (Math.abs(beta) < 0.001) {
-                    intensity = 1.0; // Batas limit matematika sinc saat mendekati 0 (terang pusat)
+                    intensity = 1.0;
                 } else {
-                    // Rumus Fungsi Sinc kuadrat: [sin(beta) / beta]^2
                     intensity = Math.pow(Math.sin(beta) / beta, 2);
                 }
 
-                // A. Grafik Intensitas Berwarna Transparan (Maks lebar 120px)
-                const graphWidth = intensity * 120;
-                ctx.fillStyle = `rgba(${colorObj.r}, ${colorObj.g}, ${colorObj.b}, 0.4)`;
-                ctx.fillRect(screenX + 10, y, graphWidth, 1);
+                // 1. Kurva Intensitas Sekunder
+                const graphLength = intensity * 110;
+                ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 0.55)`;
+                ctx.fillRect(screenX + 10, y, graphLength, 1);
 
-                if (y > 0) {
-                    ctx.fillStyle = `rgba(255, 255, 255, 0.25)`;
-                    ctx.fillRect(screenX + 10 + graphWidth, y, 1.2, 1);
-                }
+                ctx.fillStyle = "rgba(255,255,255,0.4)";
+                ctx.fillRect(screenX + 10 + graphLength, y, 1, 1);
 
-                // B. Pola Pita Difraksi di Layar
-                ctx.fillStyle = `rgba(${colorObj.r}, ${colorObj.g}, ${colorObj.b}, ${intensity})`;
-                ctx.fillRect(canvas.width - 100, y, 100, 1);
+                // 2. Proyeksi Pola Terang Terang Layar Tangkapan
+                ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${intensity})`;
+                ctx.fillRect(canvas.width - 120, y, 120, 1);
             }
 
-            // Garis pembatas layar
+            // Garis Pembatas Layar
             ctx.strokeStyle = "#ffffff";
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -404,36 +479,30 @@
             ctx.lineTo(screenX, canvas.height);
             ctx.stroke();
 
-            // Label Teks Layar
+            // Teks Labelling Canvas
             ctx.fillStyle = "#fff";
-            ctx.font = "bold 11px Arial";
-            ctx.fillText("GRAFIK INTENSITAS (SINC)", screenX + 12, 20);
-            ctx.fillText("POLA PITA DI LAYAR", canvas.width - 110, 20);
-            
-            // Garis bantu jarak L
-            ctx.strokeStyle = "#666";
+            ctx.font = "bold 10px sans-serif";
+            ctx.fillText("KURVA INTENSITAS I(θ)", screenX + 12, 18);
+            ctx.fillText("TAMPILAN LAYAR", canvas.width - 110, 18);
+
+            // Garis Dimensi Jarak Celah ke Layar (L)
+            ctx.strokeStyle = "#555";
             ctx.lineWidth = 1;
-            ctx.setLineDash([4, 4]);
+            ctx.setLineDash([5, 5]);
             ctx.beginPath();
-            ctx.moveTo(slitX + 12, canvas.height - 25);
-            ctx.lineTo(screenX, canvas.height - 25);
+            ctx.moveTo(slitX + 10, canvas.height - 20);
+            ctx.lineTo(screenX, canvas.height - 20);
             ctx.stroke();
             ctx.setLineDash([]);
-            ctx.fillStyle = "#aaa";
+            
+            ctx.fillStyle = "#8e8e93";
             ctx.font = "11px sans-serif";
-            ctx.fillText(`Jarak Layar (L) = ${L.toFixed(1)} m`, (slitX + screenX)/2 - 50, canvas.height - 12);
+            ctx.fillText(`Jarak Celah-Layar (L) = ${L.toFixed(1)} m`, (slitX + screenX)/2 - 65, canvas.height - 8);
 
             requestAnimationFrame(drawSimulation);
         }
 
-        // Listener input slider
-        wlInput.addEventListener('input', drawSimulation);
-        aInput.addEventListener('input', drawSimulation);
-        LInput.addEventListener('input', drawSimulation);
-
-        // Jalankan render awal
         drawSimulation();
     </script>
 </body>
 </html>
-Dwi Yono, S.Pd, Guru Fisika SMAN 1 Karanganyar
