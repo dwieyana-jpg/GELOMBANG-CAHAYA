@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulasi Pembiasan Cahaya (Ala PhET)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulasi Pembiasan Cahaya Pro</title>
     <style>
         :root {
             --bg-color: #1a1a24;
@@ -14,444 +14,300 @@
 
         body {
             margin: 0;
-            padding: 20px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 10px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            box-sizing: border-box;
+        }
+
+        .main-wrapper {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         h1 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 24px;
-            font-weight: 600;
-            letter-spacing: 1px;
+            font-size: 1.1rem;
             text-align: center;
-        }
-
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            background: var(--panel-color);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            max-width: 1050px;
-            width: 100%;
+            margin: 10px 0;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .canvas-container {
-            position: relative;
-            flex: 1;
-            min-width: 600px;
+            width: 100%;
+            touch-action: none;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         canvas {
-            border-radius: 8px;
-            background-color: #000;
             display: block;
-            cursor: crosshair;
             width: 100%;
             height: auto;
+            aspect-ratio: 4 / 3;
         }
 
-        .control-panel {
-            width: 300px;
+        .control-section {
+            background: var(--panel-color);
+            padding: 15px;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 12px;
         }
 
         .control-group {
             background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            border-left: 4px solid var(--accent-color);
         }
 
-        .control-group h3 {
-            margin: 0 0 10px 0;
-            font-size: 16px;
-            color: var(--accent-color);
-        }
-
-        .slider-label {
+        .label-row {
             display: flex;
             justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 5px;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .n-badge {
+            background: var(--accent-color);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
         }
 
         input[type="range"] {
             width: 100%;
-            margin-bottom: 10px;
+            height: 30px;
             accent-color: var(--accent-color);
         }
 
-        .data-display {
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .data-item {
+            font-size: 0.7rem;
             font-family: monospace;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 10px;
-            border-radius: 6px;
-            margin-top: 10px;
-            font-size: 13px;
+            color: #ccc;
         }
 
-        .data-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
+        .data-item b {
+            display: block;
+            font-size: 0.9rem;
+            color: #fff;
+            margin-top: 3px;
         }
 
-        .data-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .instructions {
-            font-size: 13px;
-            color: #aaa;
-            line-height: 1.5;
+        .help-text {
+            font-size: 0.75rem;
+            color: #00adb5;
+            text-align: center;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
 
-    <h1>SIMULASI PEMBIASAN CAHAYA</h1>
+    <div class="main-wrapper">
+        <h1>Simulasi Optik: Pembiasan</h1>
 
-    <div class="container">
-        <!-- Area Simulasi -->
         <div class="canvas-container">
-            <canvas id="simCanvas" width="700" height="500"></canvas>
+            <canvas id="simCanvas" width="800" height="600"></canvas>
         </div>
 
-        <!-- Panel Kontrol -->
-        <div class="control-panel">
-            <!-- Medium 1 -->
+        <div class="control-section">
             <div class="control-group">
-                <h3>Medium 1 (Atas)</h3>
-                <div class="slider-label">
-                    <span>Indeks Bias (n1):</span>
-                    <span id="n1-val">1.00</span>
+                <div class="label-row">
+                    <span>Medium 1: <b id="m1-name">Udara</b></span>
+                    <span class="n-badge">n₁ = <span id="n1-val">1.00</span></span>
                 </div>
                 <input type="range" id="n1-slider" min="1.0" max="2.5" step="0.01" value="1.00">
-                <div class="slider-label"><span id="m1-name" style="color: #aaa;">Udara</span></div>
             </div>
 
-            <!-- Medium 2 -->
             <div class="control-group">
-                <h3>Medium 2 (Bawah)</h3>
-                <div class="slider-label">
-                    <span>Indeks Bias (n2):</span>
-                    <span id="n2-val">1.50</span>
+                <div class="label-row">
+                    <span>Medium 2: <b id="m2-name">Kaca</b></span>
+                    <span class="n-badge">n₂ = <span id="n2-val">1.50</span></span>
                 </div>
                 <input type="range" id="n2-slider" min="1.0" max="2.5" step="0.01" value="1.50">
-                <div class="slider-label"><span id="m2-name" style="color: #aaa;">Kaca</span></div>
             </div>
 
-            <!-- Data Analisis -->
-            <div class="control-group">
-                <h3>Data Numerik</h3>
-                <div class="data-display">
-                    <div class="data-row"><span>Sudut Datang (&theta;&bull;):</span> <span id="data-theta1">0.0°</span></div>
-                    <div class="data-row"><span>Sudut Bias (&theta;&bull;):</span> <span id="data-theta2">0.0°</span></div>
-                    <div class="data-row"><span>Sudut Pantul:</span> <span id="data-reflect">0.0°</span></div>
-                </div>
+            <div class="data-grid">
+                <div class="data-item">Sudut Datang<b id="data-theta1">0.0°</b></div>
+                <div class="data-item">Sudut Bias<b id="data-theta2">0.0°</b></div>
+                <div class="data-item">Sudut Pantul<b id="data-reflect">0.0°</b></div>
             </div>
 
-            <!-- Petunjuk -->
-            <div class="control-group">
-                <h3>Petunjuk</h3>
-                <p class="instructions">
-                    Klik dan <b>tarik (drag) lingkaran merah</b> pada ujung sumber laser untuk mengubah sudut datang cahaya.
-                </p>
-            </div>
+            <p class="help-text">● Geser lingkaran pada laser untuk memutar sinar</p>
         </div>
     </div>
 
     <script>
         const canvas = document.getElementById('simCanvas');
         const ctx = canvas.getContext('2d');
-
-        // Elemen UI
         const n1Slider = document.getElementById('n1-slider');
         const n2Slider = document.getElementById('n2-slider');
         const n1Val = document.getElementById('n1-val');
         const n2Val = document.getElementById('n2-val');
         const m1Name = document.getElementById('m1-name');
         const m2Name = document.getElementById('m2-name');
-        
         const dataTheta1 = document.getElementById('data-theta1');
         const dataTheta2 = document.getElementById('data-theta2');
         const dataReflect = document.getElementById('data-reflect');
 
-        // Parameter Fisika & Kanvas
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
-        let laserRadius = 180; // Jarak handle laser dari pusat
-        let laserAngle = Math.PI + Math.PI / 4; // Sudut awal (45 derajat di kuadran atas-kiri)
+        let laserRadius = 250; 
+        let laserAngle = Math.PI + Math.PI / 4; 
         let isDragging = false;
 
-        // Nama material berdasarkan indeks bias (pendekatan)
-        function getMaterialName(n) {
-            if (n === 1.0) return "Vakum";
-            if (n > 1.0 && n <= 1.05) return "Udara";
-            if (n > 1.05 && n <= 1.32) return "Es";
-            if (n > 1.32 && n <= 1.34) return "Air";
-            if (n > 1.34 && n <= 1.45) return "Minyak";
-            if (n > 1.45 && n <= 1.65) return "Kaca Karsa/Flint";
-            if (n > 1.65 && n <= 2.0) return "Saphire";
-            return "Intens / Berlian Tiruan";
+        function getMaterial(n) {
+            if (n <= 1.01) return "Udara";
+            if (n <= 1.33) return "Air";
+            if (n <= 1.50) return "Kaca";
+            if (n <= 2.42) return "Intan";
+            return "Custom";
         }
 
-        // Event Listeners untuk Slider
-        n1Slider.addEventListener('input', () => {
-            n1Val.textContent = parseFloat(n1Slider.value).toFixed(2);
-            m1Name.textContent = getMaterialName(parseFloat(n1Slider.value));
-            draw();
-        });
-
-        n2Slider.addEventListener('input', () => {
-            n2Val.textContent = parseFloat(n2Slider.value).toFixed(2);
-            m2Name.textContent = getMaterialName(parseFloat(n2Slider.value));
-            draw();
-        });
-
-        // Deteksi Drag Laser
-        function getMousePos(e) {
+        function getPos(e) {
             const rect = canvas.getBoundingClientRect();
-            // Menyesuaikan ukuran canvas asli dengan ukuran scaling CSS
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             return {
-                x: (e.clientX - rect.left) * scaleX,
-                y: (e.clientY - rect.top) * scaleY
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
             };
         }
 
-        function checkHit(pos) {
-            const laserX = centerX + laserRadius * Math.cos(laserAngle);
-            const laserY = centerY + laserRadius * Math.sin(laserAngle);
-            const dist = Math.hypot(pos.x - laserX, pos.y - laserY);
-            return dist < 20; // Radius toleransi klik 20px
+        function handleStart(e) {
+            const pos = getPos(e);
+            const lx = centerX + laserRadius * Math.cos(laserAngle);
+            const ly = centerY + laserRadius * Math.sin(laserAngle);
+            if (Math.hypot(pos.x - lx, pos.y - ly) < 50) isDragging = true;
         }
 
-        canvas.addEventListener('mousedown', (e) => {
-            const mousePos = getMousePos(e);
-            if (checkHit(mousePos)) {
-                isDragging = true;
-            }
-        });
-
-        window.addEventListener('mousemove', (e) => {
+        function handleMove(e) {
             if (!isDragging) return;
-            const mousePos = getMousePos(e);
-            
-            // Hitung sudut dari pusat interaksi
-            let angle = Math.atan2(mousePos.y - centerY, mousePos.x - centerX);
-            
-            // Batasi agar laser hanya bisa berada di medium atas (y < centerY)
-            if (angle > -0.05 && angle < Math.PI/2) angle = -0.05;
-            if (angle >= Math.PI/2 && angle < Math.PI + 0.05) angle = Math.PI + 0.05;
-
-            laserAngle = angle;
-            draw();
-        });
-
-        window.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
-
-        // Touch support untuk HP/Tablet
-        canvas.addEventListener('touchstart', (e) => {
-            if(e.touches.length === 1) {
-                const mousePos = getMousePos(e.touches[0]);
-                if (checkHit(mousePos)) isDragging = true;
-            }
-        });
-        window.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const mousePos = getMousePos(e.touches[0]);
-            let angle = Math.atan2(mousePos.y - centerY, mousePos.x - centerX);
+            if (e.cancelable) e.preventDefault();
+            const pos = getPos(e);
+            let angle = Math.atan2(pos.y - centerY, pos.x - centerX);
             if (angle > -0.05 && angle < Math.PI/2) angle = -0.05;
             if (angle >= Math.PI/2 && angle < Math.PI + 0.05) angle = Math.PI + 0.05;
             laserAngle = angle;
             draw();
-        });
-        window.addEventListener('touchend', () => { isDragging = false; });
+        }
 
+        canvas.addEventListener('mousedown', handleStart);
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', () => isDragging = false);
+        canvas.addEventListener('touchstart', handleStart, {passive: false});
+        window.addEventListener('touchmove', handleMove, {passive: false});
+        window.addEventListener('touchend', () => isDragging = false);
 
-        // Fungsi Menggambar Utama
         function draw() {
             const n1 = parseFloat(n1Slider.value);
             const n2 = parseFloat(n2Slider.value);
+            
+            n1Val.innerText = n1.toFixed(2);
+            n2Val.innerText = n2.toFixed(2);
+            m1Name.innerText = getMaterial(n1);
+            m2Name.innerText = getMaterial(n2);
 
-            // Clear Canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. Gambar Background Medium
-            // Medium 1 (Atas)
-            ctx.fillStyle = "#1e293b";
+            // Mediums
+            ctx.fillStyle = "#1e293b"; 
             ctx.fillRect(0, 0, canvas.width, centerY);
-            
-            // Medium 2 (Bawah) - Warna berubah kebiruan/pekat berdasarkan indeks bias
-            const alpha2 = Math.min(0.1 + (n2 - 1) * 0.3, 0.6);
-            ctx.fillStyle = `rgba(0, 173, 181, ${alpha2})`;
+            ctx.fillStyle = `rgba(0, 173, 181, ${Math.min(0.1 + (n2 - 1) * 0.3, 0.45)})`;
             ctx.fillRect(0, centerY, canvas.width, centerY);
 
-            // Garis Batas Medium (Interface)
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, centerY);
-            ctx.lineTo(canvas.width, centerY);
-            ctx.stroke();
+            // Labels on Canvas
+            ctx.fillStyle = "rgba(255,255,255,0.7)";
+            ctx.font = "bold 20px Arial";
+            ctx.fillText(`n₁ = ${n1.toFixed(2)}`, 20, 40);
+            ctx.fillText(`n₂ = ${n2.toFixed(2)}`, 20, canvas.height - 30);
 
-            // 2. Gambar Garis Normal (Putus-putus)
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
-            ctx.lineWidth = 1.5;
-            ctx.setLineDash([6, 6]);
-            ctx.beginPath();
-            ctx.moveTo(centerX, 0);
-            ctx.lineTo(centerX, canvas.height);
-            ctx.stroke();
-            ctx.setLineDash([]); // Reset line dash
+            // Normal line
+            ctx.setLineDash([10, 10]); ctx.strokeStyle = "rgba(255,255,255,0.2)";
+            ctx.beginPath(); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, canvas.height); ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Interface line
+            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(canvas.width, centerY); ctx.stroke();
 
-            // 3. Kalkulasi Fisika Sinar
-            // Sudut datang (terhadap garis vertikal/normal)
-            // laserAngle berkisar antara -PI sampai 0 (di atas garis horizontal)
+            // Physics
             let theta1 = Math.abs(laserAngle - (-Math.PI / 2));
-            if (laserAngle > -Math.PI / 2) {
-                theta1 = Math.abs(laserAngle + Math.PI / 2);
-            }
-
-            // Tentukan arah sinar datang (kiri ke kanan atau kanan ke kiri)
-            const rayFromLeft = (laserAngle < -Math.PI / 2);
-
-            // Hukum Snellius: n1 * sin(theta1) = n2 * sin(theta2)
+            if (laserAngle > -Math.PI / 2) theta1 = Math.abs(laserAngle + Math.PI / 2);
+            
             const sinTheta2 = (n1 * Math.sin(theta1)) / n2;
+            let tir = sinTheta2 > 1.0;
+            let theta2 = tir ? 0 : Math.asin(sinTheta2);
+            const fromLeft = laserAngle < -Math.PI / 2;
+
+            dataTheta1.innerText = (theta1 * 180 / Math.PI).toFixed(1) + "°";
+            dataReflect.innerText = (theta1 * 180 / Math.PI).toFixed(1) + "°";
+            dataTheta2.innerText = tir ? "TIR" : (theta2 * 180 / Math.PI).toFixed(1) + "°";
+
+            const lx = centerX + laserRadius * Math.cos(laserAngle);
+            const ly = centerY + laserRadius * Math.sin(laserAngle);
             
-            let totalInternalReflection = false;
-            let theta2 = 0;
+            // 1. SINAR DATANG (Utama - Tebal)
+            ctx.lineWidth = 4; ctx.shadowBlur = 10; ctx.shadowColor = "#ff3333"; ctx.strokeStyle = "#ff3333";
+            ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(centerX, centerY); ctx.stroke();
 
-            if (sinTheta2 > 1.0) {
-                totalInternalReflection = true;
-            } else {
-                theta2 = Math.asin(sinTheta2);
-            }
-
-            // Update Panel Data Angka
-            dataTheta1.textContent = (theta1 * 180 / Math.PI).toFixed(1) + "°";
-            dataReflect.textContent = (theta1 * 180 / Math.PI).toFixed(1) + "°";
-            if (totalInternalReflection) {
-                dataTheta2.textContent = "Pemantulan Sempurna";
-                dataTheta2.style.color = "#ff4141";
-            } else {
-                dataTheta2.textContent = (theta2 * 180 / Math.PI).toFixed(1) + "°";
-                dataTheta2.style.color = "#fff";
-            }
-
-            // Posisi alat laser fisik
-            const laserX = centerX + laserRadius * Math.cos(laserAngle);
-            const laserY = centerY + laserRadius * Math.sin(laserAngle);
-
-            // 4. Ggmbarkan Sinar-sinar cahaya
-            
-            // Sinar Datang (Merah Neon kuat)
-            ctx.strokeStyle = "#ff3333";
-            ctx.lineWidth = 4;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = "#ff3333";
-            ctx.beginPath();
-            ctx.moveTo(laserX, laserY);
-            ctx.lineTo(centerX, centerY);
-            ctx.stroke();
-
-            // Sinar Pantul (Selalu ada, tipis jika tidak TIR, tebal jika TIR)
-            let reflectAlpha = 0.15; 
-            if (totalInternalReflection) {
-                reflectAlpha = 1.0;
-            } else {
-                // Pendekatan koefisien refleksi Fresnel sederhana untuk estetika simulasi
-                reflectAlpha = 0.1 + Math.pow((n1-n2)/(n1+n2), 2) + Math.pow(theta1/(Math.PI/2), 5) * 0.4;
-            }
-            
-            const reflectAngle = rayFromLeft ? -Math.PI/2 + theta1 : -Math.PI/2 - theta1;
-            const reflectEndX = centerX + 300 * Math.cos(reflectAngle);
-            const reflectEndY = centerY + 300 * Math.sin(reflectAngle);
-
+            // 2. SINAR PANTUL (Tipis & Transparan)
+            // Intensitas sangat rendah kecuali jika TIR (Total Internal Reflection)
+            let reflectAlpha = tir ? 0.8 : 0.15; 
+            ctx.shadowBlur = tir ? 10 : 0;
+            ctx.lineWidth = 2; // Tipis saja
             ctx.strokeStyle = `rgba(255, 51, 51, ${reflectAlpha})`;
-            ctx.lineWidth = totalInternalReflection ? 4 : 2;
-            ctx.shadowColor = `rgba(255, 51, 51, ${reflectAlpha})`;
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.lineTo(reflectEndX, reflectEndY);
-            ctx.stroke();
+            const rAng = fromLeft ? -Math.PI/2 + theta1 : -Math.PI/2 - theta1;
+            ctx.beginPath(); ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX + 400 * Math.cos(rAng), centerY + 400 * Math.sin(rAng)); ctx.stroke();
 
-            // Sinar Bias (Jika tidak terjadi Pemantulan Internal Sempurna)
-            if (!totalInternalReflection) {
-                const refractAngle = rayFromLeft ? Math.PI/2 - theta2 : Math.PI/2 + theta2;
-                const refractEndX = centerX + 300 * Math.cos(refractAngle);
-                const refractEndY = centerY + 300 * Math.sin(refractAngle);
-
-                ctx.strokeStyle = "#ff3333";
-                ctx.lineWidth = 4;
-                ctx.shadowColor = "#ff3333";
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.lineTo(refractEndX, refractEndY);
-                ctx.stroke();
+            // 3. SINAR BIAS (Utama - Tebal)
+            if (!tir) {
+                ctx.lineWidth = 4; ctx.shadowBlur = 10; ctx.strokeStyle = "#ff3333";
+                const reAng = fromLeft ? Math.PI/2 - theta2 : Math.PI/2 + theta2;
+                ctx.beginPath(); ctx.moveTo(centerX, centerY);
+                ctx.lineTo(centerX + 500 * Math.cos(reAng), centerY + 500 * Math.sin(reAng)); ctx.stroke();
             }
-
-            // Reset Efek Glow Sinar agar tidak merusak objek gambar lain
+            
+            // Laser Unit
             ctx.shadowBlur = 0;
-
-            // 5. Gambar Busur / Indikator Sudut (Protractor sederhana)
-            ctx.strokeStyle = "rgba(255,255,255,0.15)";
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 60, 0, 2*Math.PI);
-            ctx.stroke();
-            
-            // Label teks medium di canvas
-            ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-            ctx.font = "14px sans-serif";
-            ctx.fillText(getMaterialName(n1) + ` (n=${n1.toFixed(2)})`, 20, 30);
-            ctx.fillText(getMaterialName(n2) + ` (n=${n2.toFixed(2)})`, 20, canvas.height - 20);
-
-            // 6. Gambar Fisik Alat Penembak Laser (UI Handle)
             ctx.save();
-            ctx.translate(laserX, laserY);
-            ctx.rotate(laserAngle + Math.PI); // Hadap ke pusat
-            
-            // Body laser
-            ctx.fillStyle = "#475569";
-            ctx.fillRect(-15, -10, 30, 20);
-            ctx.fillStyle = "#334155";
-            ctx.fillRect(15, -6, 8, 12);
-            
-            // Handle bulat merah untuk drag info
-            ctx.fillStyle = isDragging ? "#ff4141" : "#e11d48";
-            ctx.beginPath();
-            ctx.arc(0, 0, 6, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = "#fff";
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            
+            ctx.translate(lx, ly); ctx.rotate(laserAngle + Math.PI);
+            ctx.fillStyle = "#475569"; ctx.fillRect(-25, -15, 50, 30);
+            ctx.fillStyle = isDragging ? "#00adb5" : "#e11d48";
+            ctx.beginPath(); ctx.arc(0, 0, 12, 0, 7); ctx.fill();
+            ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
             ctx.restore();
         }
 
-        // Inisialisasi awal saat halaman dimuat
-        m1Name.textContent = getMaterialName(parseFloat(n1Slider.value));
-        m2Name.textContent = getMaterialName(parseFloat(n2Slider.value));
+        [n1Slider, n2Slider].forEach(s => s.addEventListener('input', draw));
         draw();
     </script>
 </body>
+Dwi Yono, S.Pd Guru Fisika SMAN 1 Karanganyar
 </html>
